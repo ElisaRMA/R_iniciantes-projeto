@@ -3,35 +3,134 @@ title: "Bibliometria"
 author: "Elisa Ribeiro Miranda Antunes"
 date: "26 de abril de 2019"
 output: pdf_document
+geometry: "left=2cm,right=2cm,top=2cm,bottom=2cm"
 ---
 
 ## Introdução
 
-A palavra chave utilizada foi "plant metabolomics"
+  Para o trabalho final da disciplina de R para iniciantes, foi selecionada a proposta 5, sobre dados bibliográficos. Para a bibliometria, foi utilizada a palavra chave "plant metabolomics".
 
+  Esta palavra chave se refere aos estudos de metabolomica de plantas, ou seja, os estudos dos metabólicos, primários e secundários, presentes no Reino Vegetal. 
+A Metabolômica de plantas é uma area em ascendência, com ampla aplicação e permite: o melhor entendimento das reações da planta às condições ambientais, a detecção de compostos de interesse medicinal ou comercial, etc. 
 
 ## Recursos
-pacote bibliometrix, rmarkdown,
+
+  O pacote utilizado para este projeto foi o Bibliometrix [1]. O pacote foi inicialmente instalado e em seguida carregado atraves dos seguintes códigos:
+
+```{r echo = TRUE, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE, paged.print=FALSE}
+install.packages("bibliometrix", dependencies=TRUE, repos = "http://cran.us.r-project.org")
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(bibliometrix)
+```
 
 ## Desenvolvimento
 
-### Gráficos
-### Maior produção
-
-### Maior quantidade de citações
-
-### Co-citações
-
-### Rede de co-citações
+  O projeto foi desenvolvido em várias etapas, das quais: Importação de Dados, Calculo dos Dados Bibliométricos, Elaboração dos Gráficos e Elaboração da Rede de Co-citaçao.
 
 
+### Importação dos Dados
 
-## Respostas encontradas
+  Os dados foram importados da plataforma Web of Science, foram encontrados 72 resultados para a palavra chave "plant metabolomics"
+
+  Os dados exportados foram salvos no Diretório do R associado ao Git e o seguinte código foi utilizado para a leitura dos dados: 
+
+```{r echo=TRUE}
+WoS.plant.metab <- readFiles("C:/Users/elisa/Documents/R Directory/R_iniciantes-projeto/savedrecs.bib")
+```
+
+  Os dados foram então convertidos ao formato data frame pelo seguinte código:
+
+```{r include=FALSE}
+plant.metab.df <- convert2df(WoS.plant.metab, dbsource = "isi", format = "bibtex")
+```
+
+### Cálculo dos Dados Bibliométricos
+
+  Após a importação, os dados bibliométricos principais foram calculados através do seguinte código:
+
+```{r echo=TRUE, message=TRUE}
+bibl.plant.metab <- biblioAnalysis(plant.metab.df, sep = ";")
+```
+
+  Após o cálculo dos dados bibliométricos, foram plotados os gráficos
+
+### Elaboração dos Gráficos
+
+  Os gráficos foram plotados com os 10 autores mais produtivos, os 10 países mais produtivos, produção científica anual, média de artigos citados por ano e média de citações por ano.
+
+  Para realização dos gráficos, inicialmente resumida toda a informação bibliométrica através da função "summary". Os códigos utilizados para esta etapa foram:
+
+```{r echo=TRUE}
+
+options(width=100)
+sum.plant.metab <- summary(object = bibl.plant.metab, k = 10, pause = FALSE)
+
+
+plot(x = bibl.plant.metab, k = 10, pause = FALSE) #plot
+
+```
+
+  
+  
+  Foi também plotado gráfico ilustrando a produção dos autores ao longo do tempo, através do seguinte código:
+
+```{r echo=TRUE}
+topAU <- authorProdOverTime(plant.metab.df, k = 10, graph = TRUE)
+```
+
+
+### Elaboração da Rede de Co-citação
+
+  Para realização da rede de co-citação foi, inicialmente, formada a matrix através do seguinte código:
+
+```{r echo=TRUE}
+NetMatrix <- biblioNetwork(plant.metab.df, analysis = "co-citation", 
+                           network = "references", sep = ";")
+```
+
+  A seguir, a rede foi plotada, utilizando o seguinte código:
+
+```{r echo=TRUE}
+net=networkPlot(NetMatrix, n = 30, Title = "Co-Citation Network", type = "fruchterman", 
+                size=T, remove.multiple=FALSE, labelsize=0.7,edgesize = 5)
+```
+
+## Respostas Encontradas
+
+  Através das analises realizadas foi observado que o autor mais produtivo na área é Saito K, entretanto, sua produção não aumentou de 2003 para 2017, de acordo com o gráfico de "Top Author's production over the years"
+
+  Com relação a produção por país, a Alemanhã se posicionou em primeiro lugar no ranking de produção na área de "plant metabolomics" e aproximadamente 1/5 desta produção possui colaboração múltipla entre países. Em contrapartida, Estados Unidos, em 6º lugar no ranking possui mais da metade de sua produção derivada de colaboração entre países. 
+O Brasil, por sua vez, está em 9º lugar na área de "plant metabolomics", com nenhuma produção colaborativa, da mesma forma que a Bélgica, de acordo com o gráfico.
+
+  De acordo com o gráfico de produção científica anual a área de "plant metabolomics" cresceu de 2003 para 2017. Apesar da presença de altos e baixos na produção a tendência foi de aumento, com pico produtivo e 2016. Porém a citação média de artigos por ano diminuiu, com pico de citação em 2003 e em constante queda até 2017, da mesma forma que a média de citação total por ano.
 
 
 ## Dificuldades encontradas
 
+  Inicialmente foram encontradas dificuldades com relação à geração do PDF através do RMarkdown mas após procurar resoluções em sites relacionados ao R o problema foi resolvido. A dificuldade estava relacionada a geração do PDF com códigos do pacote bibliometrix. Era necessário adicionar, na linha de código que instalava o pacote, o local de onde a instalação ocorreria (repos = "http://cran.us.r-project.org" ) 
+  
+  Foram também encontradas dificuldades com relação às margens do documento PDF do RMarkdown. O problema foi contornado quebrando as linhas e códigos e foi solucionado após consulta em páginas de ajuda do R e adicionando o parâmetro "geometry" no topo do documento foi possível personalizar as margens do arquivo.
+
+  Além disso, houveram dificuldades, não solucionadas, em plotar gráficos com os dados dos artigos mais citados (MostCitedPapers), no modelo dos gráficos de "Most Productive Authors" e "Most Productive Countries". A ideia era plotar um gráfico com os 10 papers mais citados e a quantidade de citações para cada, mostrando o ranking. Este gráfico conteria o nome do autor, ano e revista e quantas citações tal artigo obteve. 
+
+  Alguns dos códigos que foram utilizados na tentativa de realizar tal gráfico foram:
+
+```{r echo=TRUE}
+plot(bibl.plant.metab[["MostCitedPapers"]]) #que retorna vários gráficos de pontos
+```
+
+```{r echo = TRUE, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE, paged.print=FALSE}
+plot(sum.plant.metab[["MostCitedPapers"]]) #que retorna um grafico vazio e mensagens de erro
+```
+
+```{r echo = TRUE, eval=FALSE, message=FALSE, warning=FALSE, include=TRUE, paged.print=FALSE}
+plot(y = sum.plant.metab[["MostCitedPapers$Paper"]], 
+     x = sum.plant.metab[["MostCitedPapers$TC"]]) #que também retorna apenas mensagem de erro
+```
 
 
 ## Bibliografia
 
+[1] Aria, M. & Cuccurullo, C. (2017) bibliometrix: An R-tool for comprehensive science mapping analysis, Journal of Informetrics, 11(4), pp 959-975, Elsevier.
